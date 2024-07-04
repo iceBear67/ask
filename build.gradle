@@ -29,10 +29,13 @@ graalvmNative {
             imageName.set("ask")
             buildArgs.addAll(
                     "--initialize-at-run-time"
-                    , "--static"
                     , "--enable-https"
-                    , "--gc=G1"
-                    , "-R:MaxHeapSize=50M")
+                    , "-march=compatibility")
+            if (System.getProperty("os.name").contains("Linux")){
+                buildArgs.add("--gc=G1")
+            }
+            if (System.getenv("CI") != null) buildArgs.add("-J-Xmx12g")
+            if (!System.getProperty("os.name").contains("Mac")) buildArgs.add("--static")
         }
     }
 }
