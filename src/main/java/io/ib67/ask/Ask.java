@@ -1,9 +1,7 @@
 package io.ib67.ask;
 
-import dev.langchain4j.data.message.ChatMessage;
-import dev.langchain4j.data.message.SystemMessage;
-import dev.langchain4j.data.message.UserMessage;
-import dev.langchain4j.model.openai.OpenAiChatModel;
+import io.ib67.ask.ai.ChatMessage;
+import io.ib67.ask.ai.OpenAiChatModel;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,14 +15,14 @@ public class Ask {
     private final ArrayList<ChatMessage> session = new ArrayList<>();
 
     public Ask(String apiKey, String endpointUrl, String model, String systemPrompt) {
-        this.model = OpenAiChatModel.builder()
-                .apiKey(requireNonNull(apiKey, "KEY cannot be null."))
-                .baseUrl(endpointUrl)
-                .modelName(model)
-                .customHeaders(Map.of("User-Agent", "ask/0.1.0"))
-                .build();
+        this.model = new OpenAiChatModel(
+                requireNonNull(apiKey, "KEY cannot be null."),
+                model,
+                endpointUrl
+        );
+
         if (systemPrompt != null && !systemPrompt.isBlank()) {
-            session.add(new SystemMessage(systemPrompt));
+            session.add(ChatMessage.ofSystemMessage(systemPrompt));
         }
     }
 
@@ -33,14 +31,14 @@ public class Ask {
         var inPipe = System.in.available() > 0;
         if (!prompt.trim().isEmpty()) {
             if (inPipe) {
-                session.add(new SystemMessage(prompt)); // in-pipe
+                session.add(ChatMessage.ofSystemMessage(prompt)); // in-pipe
             } else {
                 askFromUser(prompt);
             }
         }
         if (interactive) {
             beginInteractive();
-        } else if(inPipe) {
+        } else if (inPipe) {
             askFromUser(new String(System.in.readAllBytes()));
         }
     }
@@ -56,9 +54,9 @@ public class Ask {
     }
 
     public void askFromUser(String prompt) {
-        session.add(new UserMessage(prompt));
-        var msg = model.generate(session).content();
-        System.out.println(msg.text());
+        session.add(ChatMessage.ofUserMessage(prompt));
+        var msg = model.generate(session);
+        System.out.println(msg.content());
         session.add(msg);
     }
 }
