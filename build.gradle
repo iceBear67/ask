@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'application'
     id 'org.graalvm.buildtools.native' version '0.10.1'
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = 'io.ib67.tool'
@@ -17,6 +18,7 @@ dependencies {
     testImplementation platform('org.junit:junit-bom:5.9.1')
     testImplementation 'org.junit.jupiter:junit-jupiter'
     implementation 'com.google.code.gson:gson:2.11.0'
+    implementation 'net.sourceforge.argparse4j:argparse4j:0.9.0'
 }
 graalvmNative {
     agent {
@@ -24,16 +26,19 @@ graalvmNative {
     }
     binaries {
         main {
+            def isLinux = System.getProperty("os.name").contains("Linux")
+            def isCI = System.getenv("CI") != null
+            def isMac = !System.getProperty("os.name").contains("Mac")
             imageName.set("ask")
             buildArgs.addAll(
                     "--initialize-at-run-time"
                     , "--enable-https"
                     , "-march=compatibility")
-            if (System.getProperty("os.name").contains("Linux")) {
+            if (isLinux && isCI) {
                 buildArgs.add("--gc=G1")
             }
-            if (System.getenv("CI") != null) buildArgs.add("-J-Xmx12g")
-            if (!System.getProperty("os.name").contains("Mac")) buildArgs.add("--static")
+            if (isCI) buildArgs.add("-J-Xmx12g")
+            if (isMac) buildArgs.add("--static")
         }
     }
 }
