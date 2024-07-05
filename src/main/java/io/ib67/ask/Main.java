@@ -27,19 +27,19 @@ public class Main {
                 .setDefault(System.getProperty("user.home") + "/.config/ask-cli")
                 .dest("config root")
                 .type(String.class)
-                .help("Config root");
+                .help("Root directory of configurations");
         parser.addArgument("-d", "--dedicated-context")
                 .action(Arguments.storeTrue())
                 .setDefault(false)
                 .dest("dedicated_context")
-                .help("Each sentence will be in a new conversation, with initial prompt.");
+                .help("Each sentence will be in a new context.");
         parser.addArgument("-i", "--interactive")
                 .action(Arguments.storeTrue())
                 .setDefault(false)
                 .dest("interactive")
-                .help("Begin conversation with LLM. When used in pipe, this could split input from stdin by line.");
+                .help("Begin conversation with LLM. This will split input from stdin by line when used in pipes.");
         parser.addArgument("prompts").nargs("*")
-                .help("Your prompt. When we are in pipe, this is a system prompt.");
+                .help("Your prompt. This will be a system prompt when used in pipes.");
         try {
             var result = parser.parseArgs(args);
             var pathToCfg = Path.of(result.getString("config root"));
