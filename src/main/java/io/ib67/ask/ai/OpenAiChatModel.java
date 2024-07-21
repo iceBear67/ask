@@ -41,6 +41,7 @@ public class OpenAiChatModel {
             newContext.addAll(List.of(newMessage));
             return generate(newContext);
         } else {
+            session.addAll(List.of(newMessage));
             var result = generate(session);
             session.add(result);
             return result;

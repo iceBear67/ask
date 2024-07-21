@@ -56,7 +56,6 @@ public class Main {
                     List<String> parts = result.getList("prompts");
                     parts = parts == null ? List.of() : parts;
                     var prompt = String.join(" ", parts.toArray(String[]::new));
-
                     new Ask(cfg, result.getBoolean("dedicated_context")).run(interactive, prompt);
                 }
             }
